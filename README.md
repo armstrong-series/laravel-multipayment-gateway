@@ -8,4 +8,4 @@
     As an administrator, you can add products(sketch). Then you can view the products added(any user level) and make payment with you integrated payment service.
 </p>
 
-<h3>Design Pattern: Service Repository. Binding the interface(coming soon...)</h3>
+<h3>Design Pattern: Service Pattern Repository. Binding the interface(coming soon...)</h3>
