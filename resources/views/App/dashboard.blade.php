@@ -13,12 +13,12 @@
                                 <div class="col">
                                     <!-- Title -->
                                     <h6 class="text-uppercase font-14">
-                                       Integration
+                                       Integrations
                                     </h6>
 
                                     <!-- Heading -->
                                     <span class="font-24 text-dark mb-0">
-                                        $2500
+                                        {{ $integrations }}
                                     </span>
                                 </div>
 
@@ -41,11 +41,11 @@
                                 <div class="col">
                                     <!-- Title -->
                                     <h6 class="font-14 text-uppercase">
-                                        Total Hours
+                                        Orders
                                     </h6>
                                     <!-- Heading -->
                                     <span class="font-24 text-dark mb-0">
-                                        663.5
+                                       {{ $payments }}
                                     </span>
                                 </div>
                                 <div class="col-auto">

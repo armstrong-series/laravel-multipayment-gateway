@@ -4,10 +4,10 @@ namespace App\Helpers;
 
 class Common {
 
-    public static function splitfullName(String $fullName)
+    public static function splitfullName(string $fullName)
     {
 
-        return ($fullName) ? strtok($fullName) : null;
+        return strtok($fullName, " ") ? strtok($fullName, " ") : $fullName;
     }
 
 

@@ -7,103 +7,55 @@ use Illuminate\Http\Request;
 use Stripe\Exception\CardException;
 use Stripe\StripeClient;
 use App\Models\Payment\PaymentModel;
+use App\Models\Integrations\PaymentIntegrationModel;
 use App\Helpers\Payment;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 use Validator;
+use Illuminate\Support\Facades\Session;
 
 class StripeController extends Controller
 {
-    private $payment;
+
 
     public function __construct()
     {
-      $this->middleware('auth');
-      $this->payment = new StripeClient(Payment::STRIPE_SEC_KEY);
+        $this->middleware('auth');
     }
-
 
 
     public function makePayment(Request $request)
     {
 
-            $validator = $this->cardValidation($request->all());
-            if ($validator->fails()) {
-                $message = $validator->errors()->all();
-                foreach ($message as $messages) {
-                    return response()->json(['message' => $messages], 400);
-                }
+        dd($request->all());
+        $payment = PaymentIntegrationModel::where('user_id', Auth::id(), 'service', 'stripe')->first();
+        if ($payment) {
+            \Stripe\Stripe::setApiKey(Payment::STRIPE_SEC_KEY);
+            $customer = \Stripe\Customer::create(array(
+                "email" => Auth::user()->email,
+                "name" => Auth::user()->name,
+                "source" => $request->stripeToken
+            ));
 
-            }
-
-            $token = $this->generateStripeToken($request);
-            if (!empty($token['error'])) {
-                $request->session()->flash('danger', $token['error']);
-                return response()->redirectTo('/');
-            }
-            if (empty($token['id'])) {
-                $request->session()->flash('danger', 'Payment failed.');
-                return response()->redirectTo('/');
-            }
-
-            $charge = $this->createPaymentCharge($token['id'], 2000);
-            if (!empty($charge) && $charge['status'] == 'succeeded') {
-                $request->session()->flash('success', 'Payment completed.');
-            } else {
-                $request->session()->flash('danger', 'Payment failed.');
-            }
-            return response()->redirectTo('/');
-    }
-
-
-
-
-    private function generateStripeToken($paymentData)
-    {
-        $token = null;
-        try {
-            $token = $this->payment->tokens->create([
-                'card' => [
-                    'number' => $paymentData['cardNumber'],
-                    'exp_month' => $paymentData['month'],
-                    'exp_year' => $paymentData['year'],
-                    'cvv' => $paymentData['cvv']
-                ]
+            \Stripe\Charge::create([
+                "amount" => $request->amount * 100,
+                "currency" => "usd",
+                "customer" => $customer->id,
+                "description" => "Easypay by Unstack",
             ]);
-        } catch (CardException $cardPaymentError) {
-            $token['error'] = $cardPaymentError->getError()->message;
-        } catch (Exception $error) {
-            $token['error'] = $error->getMessage();
+
+            Session::flash('success', 'Payment successful!');
+            return back();;
+        } else {
+            $message = "Payment Service not found!";
+            return response()->json(["message" => $message], 400);
         }
-        return $token;
     }
 
 
-    private function createPaymentCharge($tokenId, $amount)
+
+
+    public function paymentSuccess()
     {
-        $charge = null;
-        try {
-            $charge = $this->stripe->charges->create([
-                'amount' => $amount,
-                'currency' => 'usd',
-                'source' => $tokenId,
-                'description' => 'My first payment'
-            ]);
-        } catch (Exception $error) {
-            $charge['error'] = $error->getMessage();
-        }
-        return $charge;
     }
-
-
-
-    protected function cardValidation(array $data) {
-        return Validator::make($data, [
-            'fullname' => 'required',
-            'cardnumber' => 'required',
-            'month' => 'required',
-            'year' => 'required',
-            'cvv' => 'required',
-
-        ]);
-	}
 }

@@ -1,67 +1,76 @@
 if (window.Vue) {
     new Vue({
-        el: '#payment-integration',
+        el: '#paymentIntegration',
 
         data: {
             isLoading: false,
 
-            integration: {
-               payment: ""
+            payment: {
+                stripe_pub_key: "",
+                stripe_sec_key: "",
+                paystack_pub_key: "",
+                paystack_sec_key: "",
+                flutterwave_pub_key: "",
+                flutterwave_sec_key: "",
+                service: "",
+                status: ""
+            },
+
+            paymentEdit: {
+                stripe_pub_key: "",
+                stripe_sec_key: "",
+                paystack_pub_key: "",
+                paystack_sec_key: "",
+                flutterwave_pub_key: "",
+                flutterwave_key: "",
+                service: "",
+                status: ""
             },
 
 
-            banner: "",
-            originalFile: '',
-            imageFile: null,
-            input: null,
-            isImageUploading: false,
 
+
+
+            payments: [],
 
             route: {
-                createEvent: "",
-                updateEvent: "",
-                deleteEvent: "",
-                updateThumbnail: ""
+                create: "",
+                update: "",
+                delete: ""
             },
 
-            events: []
+
 
         },
 
 
         mounted() {
-
-            this.route.createEvent = $("#createEvent").val();
-            this.route.updateEvent = $("#updateEvent").val();
-            this.route.deleteEvent = $("#deleteEvent").val();
-            this.route.updateThumbnail = $("#thumbnailChange").val();
-            this.events = JSON.parse($('#events').val());
-
-
+            this.route.create = $('#createPayment').val();
+            this.route.update = $('#updatePayment').val();
+            this.route.delete = $('#deletePayment').val();
+            this.payments = JSON.parse($('#payments').val());
         },
 
 
         methods: {
 
-           switchPayment(){
 
-           },
+            selectPaymentService(index){
+                this.paymentEdit = Object.assign({}, this.payments[index]);
+            },
 
-            createEvent() {
+
+            createPayment() {
                 this.isLoading = true;
                 let formData = new FormData();
-                for (let key in this.event) {
-                    let value = this.event[key]
+                for (let key in this.payment) {
+                    let value = this.payment[key]
                     formData.append(key, value);
                 }
-                formData.append('event_banner', this.originalFile);
                 formData.append('_token', $('input[name=_token]').val());
-                axios.post(this.route.createEvent, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                }).then((response) => {
-                    $('.bd-example-modal-lg').modal('hide');
+                axios.post(this.route.create, formData)
+                .then((response) => {
+                    $('#myModal').modal('hide');
                     this.$toastr.Add({
                         msg: response.data.message,
                         clickClose: false,
@@ -73,9 +82,9 @@ if (window.Vue) {
                         style: { backgroundColor: "#1BBCE8" }
                     });
 
-
                     this.isLoading = false;
-                    this.events.push(Object.assign({}, response.data.event, {}));
+                    this.payments.push(Object.assign({}, response.data.payment, {}));
+
 
                 }).catch((error) => {
                     this.isLoading = false
@@ -96,16 +105,16 @@ if (window.Vue) {
             },
 
 
-            updateEvent() {
+            changePaymentService() {
                 this.isLoading = true;
                 let formData = new FormData();
-                for (let key in this.eventEdit) {
-                    let value = this.eventEdit[key]
+                for (let key in this.paymentEdit) {
+                    let value = this.paymentEdit[key]
                     formData.append(key, value);
                 }
                 formData.append('_token', $('input[name=_token]').val());
-                axios.post(this.route.updateEvent, formData).then((response) => {
-                    $('#exampleModalCenter').modal('hide');
+                axios.post(this.route.update, formData).then((response) => {
+                    $('#changePaymentService').modal('hide');
                     this.$toastr.Add({
                         msg: response.data.message,
                         clickClose: false,
@@ -119,12 +128,12 @@ if (window.Vue) {
 
 
                     this.isLoading = false;
-                    let eventEdit = response.data.event;
-                    this.events = this.events.map((event) =>{
-                        if(event.id === eventEdit.id){
-                            event = Object.assign({},eventEdit)
+                    let paymentEdit = response.data.payment;
+                    this.payments = this.payments.map((payment) =>{
+                        if(payment.id === paymentEdit.id){
+                            payment = Object.assign({},paymentEdit)
                         }
-                        return event;
+                        return payment;
                     })
 
 
@@ -147,57 +156,11 @@ if (window.Vue) {
             },
 
 
-            changeThumbnail() {
-                this.isLoading = true;
-
-                let formData = new FormData();
-                formData.append('id', this.eventEdit.id);
-                formData.append('event_banner', this.originalFile);
-                formData.append('_token', $('input[name=_token]').val());
-
-                axios.post(this.route.updateThumbnail, formData)
-                    .then((response) => {
-                        this.isLoading = false;
-                        $('#changeThumbnail').modal('hide');
-                        this.eventEdit.image_path = this.imageFile;
-                        this.$toastr.Add({
-                            msg: response.data.message,
-                            clickClose: false,
-                            timeout: 2000,
-                            position: "toast-top-right",
-                            type: "success",
-                            preventDuplicates: true,
-                            progressbar: false,
-                            style: { backgroundColor: "#1BBCE8" }
-                        });
-                        this.isLoading = false;
-                        let thumbnailEdit = response.data.event;
-                        this.events = this.events.map((event) =>{
-                            if(event.id === thumbnailEdit.id){
-                                event = Object.assign({},thumbnailEdit)
-                            }
-                            return event;
-                        })
-                    }).catch((error) => {
-
-                        this.isLoading = false
-                        this.$toastr.Add({
-                            msg: error.response.data.message,
-                            clickClose: false,
-                            timeout: 2000,
-                            position: "toast-top-right",
-                            type: "error",
-                            preventDuplicates: true,
-                            progressbar: false,
-                            style: { backgroundColor: "#CC5BB8" }
-                        });
-                    })
-            },
 
 
-            deleteEvent(index) {
-                let event = Object.assign({}, this.events[index]);
-                event._token = $('input[name=_token]').val();
+            deletePayment(index) {
+                let payment = Object.assign({}, this.payments[index]);
+                payment._token = $('input[name=_token]').val();
 
                 const customAlert = swal({
                     title: 'Warning',
@@ -223,10 +186,10 @@ if (window.Vue) {
                 customAlert.then(value => {
                     if (value == 'delete') {
                         this.isLoading = true;
-                        axios.post(this.route.deleteEvent,{id: event.id})
+                        axios.post(this.route.delete,{id: payment.id})
                             .then(response => {
                                 this.isLoading = false;
-                                this.events.splice(index, 1);
+                                this.payments.splice(index, 1);
                                 this.$toastr.Add({
                                     msg: response.data.message,
                                     clickClose: false,
@@ -255,19 +218,6 @@ if (window.Vue) {
 
                     }
                 });
-            },
-
-            showImagePreview(event) {
-                this.input = event.target;
-                if (this.input.files && this.input.files[0]) {
-                    this.originalFile = this.input.files[0]
-                    let reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.imageFile = e.target.result;
-                    };
-
-                    reader.readAsDataURL(this.input.files[0]);
-                }
             },
 
             clearImage() {

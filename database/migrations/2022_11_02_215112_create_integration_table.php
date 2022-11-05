@@ -20,8 +20,12 @@ return new class extends Migration
             $table->string('service')->nullable();
             $table->string('api_key')->nullable();
             $table->string('access_token')->nullable();
-            $table->string('pub_key')->nullable();
-            $table->string('sec_key')->nullable();
+            $table->string('stripe_pub_key')->nullable();
+            $table->string('stripe_sec_key')->nullable();
+            $table->string('paystack_pub_key')->nullable();
+            $table->string('paystack_sec_key')->nullable();
+            $table->string('flutterwave_pub_key')->nullable();
+            $table->string('flutterwave_sec_key')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -1,34 +1,30 @@
 if (window.Vue) {
     new Vue({
-        el: '#usermanagement',
+        el: '#store-product',
 
         data: {
             isLoading: false,
 
-            user: {
+            product: {
+               name: "",
+               description: "",
+               qty: "",
+               amount: "",
+               product_image: ""
+            },
+
+            upadateProduct: {
                 name: "",
-                email: "",
-                password: "",
-                confirm_password: "",
-                phone: "",
-                role: ""
-            },
-
-            userEdit: {
-                name: '',
-                email: '',
-                password: '',
-                confirm_password: '',
-                phone: '',
-                role: '',
-
+               description: "",
+               qty: "",
+               amount: ""
             },
 
 
 
 
 
-            users: [],
+            products: [],
 
             route: {
                 create: "",
@@ -42,30 +38,24 @@ if (window.Vue) {
 
 
         mounted() {
-            this.route.create = $('#addUser').val();
-            this.route.update = $('#updateUser').val();
-            this.route.delete = $('#deleteUser').val();
-            this.users = JSON.parse($('#users').val());
+            this.route.create = $('#createProduct').val();
+            this.products = JSON.parse($('#products').val());
         },
 
 
         methods: {
 
-
-            selectUser(index){
-                this.userEdit = Object.assign({}, this.users[index]);
-            },
-
-            addUser() {
+            addProduct() {
                 this.isLoading = true;
                 let formData = new FormData();
-                for (let key in this.user) {
-                    let value = this.user[key]
+                for (let key in this.product) {
+                    let value = this.product[key]
                     formData.append(key, value);
                 }
                 formData.append('_token', $('input[name=_token]').val());
-                axios.post(this.route.create, formData).then((response) => {
-                    $('#createUser').modal('hide');
+                axios.post(this.route.create, formData)
+                .then((response) => {
+                    $('#addProduct').modal('hide');
                     this.$toastr.Add({
                         msg: response.data.message,
                         clickClose: false,
@@ -76,9 +66,15 @@ if (window.Vue) {
                         progressbar: false,
                         style: { backgroundColor: "#1BBCE8" }
                     });
-                    this.isLoading = false;
-                    this.users.push(Object.assign({}, response.data.user, {}));
 
+                    const checkoutPayment = {
+                        name: this.product.name,
+                        amount: this.product.amount,
+                    }
+                    window.localStorage.setItem('payment', JSON.stringify(checkoutPayment));
+
+                    this.isLoading = false;
+                    this.products.push(Object.assign({}, response.data.product, {}));
                 }).catch((error) => {
                     this.isLoading = false
                     this.$toastr.Add({
@@ -98,17 +94,16 @@ if (window.Vue) {
             },
 
 
-
-            updateUser() {
+            updateProduct() {
                 this.isLoading = true;
                 let formData = new FormData();
-                for (let key in this.userEdit) {
-                    let value = this.userEdit[key]
+                for (let key in this.eventEdit) {
+                    let value = this.eventEdit[key]
                     formData.append(key, value);
                 }
                 formData.append('_token', $('input[name=_token]').val());
-                axios.post(this.route.update, formData).then((response) => {
-                    $('#editUser').modal('hide');
+                axios.post(this.route.updateEvent, formData).then((response) => {
+                    $('#exampleModalCenter').modal('hide');
                     this.$toastr.Add({
                         msg: response.data.message,
                         clickClose: false,
@@ -119,13 +114,15 @@ if (window.Vue) {
                         progressbar: false,
                         style: { backgroundColor: "#1BBCE8" }
                     });
+
+
                     this.isLoading = false;
-                    let userEdit = response.data.user;
-                    this.users= this.events.map((user) =>{
-                        if(user.id === userEdit.id){
-                           user = Object.assign({},userEdit)
+                    let eventEdit = response.data.event;
+                    this.events = this.events.map((event) =>{
+                        if(event.id === eventEdit.id){
+                            event = Object.assign({},eventEdit)
                         }
-                        return user;
+                        return event;
                     })
 
 
@@ -148,9 +145,13 @@ if (window.Vue) {
             },
 
 
-            deleteUser(index) {
-                let user = Object.assign({}, this.users[index]);
-               user._token = $('input[name=_token]').val();
+
+
+
+
+            deleteProduct(index) {
+                let product = Object.assign({}, this.products[index]);
+                product._token = $('input[name=_token]').val();
 
                 const customAlert = swal({
                     title: 'Warning',
@@ -168,7 +169,7 @@ if (window.Vue) {
                             text: "Confirm",
                             value: 'delete',
                             visible: true,
-                            className: "btn-info",
+                            className: "btn-danger",
                         }
                     }
                 });
@@ -176,10 +177,10 @@ if (window.Vue) {
                 customAlert.then(value => {
                     if (value == 'delete') {
                         this.isLoading = true;
-                        axios.post(this.route.delete,{id: user.id})
+                        axios.post(this.route.delete,{id: product.id})
                             .then(response => {
                                 this.isLoading = false;
-                                this.users.splice(index, 1);
+                                this.payments.splice(index, 1);
                                 this.$toastr.Add({
                                     msg: response.data.message,
                                     clickClose: false,
@@ -210,7 +211,10 @@ if (window.Vue) {
                 });
             },
 
-
+            clearImage() {
+                this.imageFile = null;
+                this.input = null;
+            },
 
 
         }
