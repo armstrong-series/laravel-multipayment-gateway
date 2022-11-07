@@ -6,7 +6,7 @@ use App\Models\Payment\PaymentModel;
 use App\Models\Integrations\PaymentIntegrationModel;
 use Illuminate\Support\Facades\Auth;
 
-class PaymentRepository implements PaymentInterface
+class PaymentRepository
 {
 
 

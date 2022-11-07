@@ -125,7 +125,8 @@
                         </div>
                     </div>
                 </div>
-                <textarea name="" id="stripePayment" cols="30" style="display:none;" rows="10">{{ json_encode($product) }}</textarea>
+                <textarea name="" id="product" cols="30" style="display:none;" rows="10">{{ json_encode($product) }}</textarea>
+                <textarea name="" id="payments" cols="30" style="display:none;" rows="10">{{ json_encode($payments) }}</textarea>
 
             </div>
         </div>

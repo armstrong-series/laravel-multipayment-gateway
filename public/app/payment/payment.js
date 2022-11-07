@@ -48,7 +48,6 @@ if (window.Vue) {
         methods: {
             paywithStripe(){
                 this.addPaymentStatus = 1;
-
                 this.stripe.confirmCardSetup(
                     this.intentToken.client_secret, {
                         payment_method: {

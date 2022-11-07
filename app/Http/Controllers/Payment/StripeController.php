@@ -27,7 +27,7 @@ class StripeController extends Controller
     public function makePayment(Request $request)
     {
 
-        dd($request->all());
+
         $payment = PaymentIntegrationModel::where('user_id', Auth::id(), 'service', 'stripe')->first();
         if ($payment) {
             \Stripe\Stripe::setApiKey(Payment::STRIPE_SEC_KEY);

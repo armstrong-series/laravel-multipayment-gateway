@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use App\Repositories\PaymentRepository;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 
 class PaymentIntegrationController extends Controller
 {
-    private $paymentRepository;
+    private PaymentRepository $paymentRepository;
     public function __construct(PaymentRepository $paymentRepository)
     {
         $this->middleware('auth');

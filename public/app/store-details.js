@@ -39,6 +39,7 @@ if (window.Vue) {
         mounted() {
             this.route.create = $('#createProduct').val();
             this.product = JSON.parse($('#product').val());
+            console.log('products...', this.product);
             this.payments = JSON.parse($('#payments').val());
 
         },
